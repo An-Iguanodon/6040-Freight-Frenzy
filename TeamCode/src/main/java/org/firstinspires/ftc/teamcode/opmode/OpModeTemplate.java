@@ -20,11 +20,12 @@ abstract public class OpModeTemplate extends CommandOpMode {
     protected void initHardware(boolean resetEncoders) {
         mecanumDrive = new SampleMecanumDrive(hardwareMap);
 
-        deposit = new Deposit(hardwareMap);
+        deposit = new Deposit(hardwareMap, resetEncoders);
         intake = new Intake(hardwareMap);
-        carousel = new Carousel(hardwareMap);
+        //carousel = new Carousel(hardwareMap);
 
-        register(deposit, intake, carousel);
+        //register(deposit, intake, carousel);
+        register(deposit, intake);
 
         driveGamepad = new GamepadEx(gamepad1);
         opGamepad = new GamepadEx(gamepad2);

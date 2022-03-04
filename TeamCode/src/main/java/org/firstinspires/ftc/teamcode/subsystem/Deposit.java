@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -8,26 +9,25 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+@Config
 public class Deposit extends SubsystemBase {
     private HardwareMap hwMap;
     private DcMotorEx liftMotor;
     private Servo depositServo;
 
-    private double targetHeight;
-    public static double offset = 0;
+    private int targetPos;
+    public static int offset = 0;
 
     ElapsedTime timer = new ElapsedTime();
 
-    private static final double RETRACTED_HEIGHT = 0;
-    private static final double LEVEL_1_HEIGHT = 0;
-    private static final double LEVEL_2_HEIGHT = 0;
-    private static final double LEVEL_3_HEIGHT = 0;
+    private static final int RETRACTED_POS = 100;
+    public static int EXTEND_POS = 5500;
 
-    private static final double RETRACTED_POSITION = 0;
-    private static final double MOVING_POSITION = 0;
-    private static final double DEPOSIT_POSITION = 0;
+    private static final double RETRACTED_POSITION = 0.39;
+    private static final double MOVING_POSITION = 0.75;
+    private static final double DEPOSIT_POSITION = 0.05;
 
-    private static final double DEPOSIT_TIME = 0;
+    private static final double DEPOSIT_TIME = 10;
 
     private enum State {
         RETRACTED,
@@ -37,7 +37,7 @@ public class Deposit extends SubsystemBase {
     }
 
     private State state = State.RETRACTED;
-    private double power;
+    private double liftMotorPower = 1;
 
     public Deposit(HardwareMap hwMap, boolean resetEncoders) {
         this.hwMap = hwMap;
@@ -49,7 +49,10 @@ public class Deposit extends SubsystemBase {
             liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
 
-        liftMotor.setTargetPosition(inchesToTicks(RETRACTED_HEIGHT));
+        liftMotor.setTargetPosition(RETRACTED_POS);
+        liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        depositServo.setPosition(RETRACTED_POSITION);
     }
 
     @Override
@@ -59,8 +62,8 @@ public class Deposit extends SubsystemBase {
 
     @Override
     public void periodic() {
-        liftMotor.setTargetPosition(inchesToTicks(targetHeight + offset));
-        liftMotor.setPower(1.0);
+        liftMotor.setTargetPosition(targetPos + offset);
+        liftMotor.setPower(liftMotorPower);
 
         switch(state) {
             case RETRACTED:
@@ -68,20 +71,20 @@ public class Deposit extends SubsystemBase {
                 break;
             case RETRACTING:
                 depositServo.setPosition(MOVING_POSITION);
-
                 if (Math.abs(
                         liftMotor.getCurrentPosition() - liftMotor.getTargetPosition())
-                        < inchesToTicks(2.0)) {
+                        < 100) {
                     state = State.RETRACTED;
                 }
                 break;
             case MOVING:
                 depositServo.setPosition(MOVING_POSITION);
+                break;
             case DEPOSIT:
                 depositServo.setPosition(DEPOSIT_POSITION);
 
                 if (timer.seconds() > DEPOSIT_TIME) {
-                    targetHeight = RETRACTED_HEIGHT;
+                    targetPos = RETRACTED_POS;
                     state = State.RETRACTING;
                 }
                 break;
@@ -89,26 +92,18 @@ public class Deposit extends SubsystemBase {
         }
     }
 
-    public void goToHeight(double targetHeight) {
-        this.targetHeight = targetHeight;
+    public void goToPos(int targetPos) {
+        this.targetPos = targetPos;
+        liftMotorPower = 1.0;
         state = State.MOVING;
     }
 
-
-    public void goToLevel1() {
-        goToHeight(LEVEL_1_HEIGHT);
-    }
-
-    public void goToLevel2() {
-        goToHeight(LEVEL_2_HEIGHT);
-    }
-
-    public void goToLevel3() {
-        goToHeight(LEVEL_3_HEIGHT);
+    public void extend() {
+        goToPos(EXTEND_POS);
     }
 
     public void retract() {
-        targetHeight = RETRACTED_HEIGHT;
+        targetPos = RETRACTED_POS;
         state = State.RETRACTING;
     }
 
@@ -121,14 +116,28 @@ public class Deposit extends SubsystemBase {
         state = State.DEPOSIT;
     }
 
+    public void setDepositServo(double pos) {
+        depositServo.setPosition(pos);
+    }
+
+    public double getTargetPos() {
+        return targetPos;
+    }
+
+    public double getCurrentPos() {
+        return liftMotor.getCurrentPosition();
+    }
+
+    public double getLiftMotorPower() {
+        return liftMotor.getPower();
+    }
+
+    public double getOffset() {
+        return offset;
+    }
+
     public boolean isBusy() {
         return liftMotor.isBusy() || state == State.DEPOSIT;
     }
 
-    private static int inchesToTicks(double inches) {
-        final double CIRCUMFERENCE = 17.3205081;
-
-        final double TICKS_PER_ROTATION = 28 * 5.23;
-        return (int) (inches / CIRCUMFERENCE * TICKS_PER_ROTATION);
-    }
 }

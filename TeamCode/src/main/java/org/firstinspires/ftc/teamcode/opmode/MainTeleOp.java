@@ -27,10 +27,18 @@ public class MainTeleOp extends OpModeTemplate{
     public void initialize() {
         initHardware(true);
 
-        new GamepadButton(opGamepad, GamepadKeys.Button.LEFT_BUMPER).whenPressed(() -> deposit.extend());
+        new GamepadButton(opGamepad, GamepadKeys.Button.LEFT_BUMPER).whenPressed(deposit::extend);
         new GamepadButton(opGamepad, GamepadKeys.Button.RIGHT_BUMPER).whenPressed(deposit::deploy);
         new GamepadButton(opGamepad, GamepadKeys.Button.A).whenPressed(deposit::retract);
 
+        new GamepadButton(opGamepad, GamepadKeys.Button.DPAD_UP).whenPressed(() -> deposit.adjustTargetPos(50));
+        new GamepadButton(opGamepad, GamepadKeys.Button.DPAD_UP).whenPressed(() -> deposit.adjustTargetPos(-50));
+
+        new Trigger(() -> gamepad2.left_trigger > 0.25).whenActive(
+                () -> carousel.setPower(-1.0));
+        new Trigger(() -> gamepad2.right_trigger > 0.25).whenActive(
+                () -> carousel.setPower(1.0));
+        new GamepadButton(opGamepad, GamepadKeys.Button.Y).whenPressed(() -> carousel.setPower(0.0));
     }
 
     @Override
@@ -45,16 +53,6 @@ public class MainTeleOp extends OpModeTemplate{
 
         double rawIntakePower = -gamepad2.left_stick_y;
         intake.setPower(Math.signum(rawIntakePower) * rawIntakePower * rawIntakePower);
-
-        if(gamepad2.dpad_up) {
-            TEST_POS += 0.01;
-        }
-        if(gamepad2.dpad_down) {
-            TEST_POS -= 0.01;
-        }
-        if(gamepad2.b) {
-            deposit.setDepositServo(TEST_POS);
-        }
 
         dashboardTelemetry.addData("Current Position:", deposit.getCurrentPos());
         dashboardTelemetry.addData("Target Position:", deposit.getTargetPos());

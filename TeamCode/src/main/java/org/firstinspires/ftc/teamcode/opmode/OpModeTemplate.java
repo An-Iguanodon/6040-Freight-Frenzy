@@ -22,10 +22,10 @@ abstract public class OpModeTemplate extends CommandOpMode {
 
         deposit = new Deposit(hardwareMap, resetEncoders);
         intake = new Intake(hardwareMap);
-        //carousel = new Carousel(hardwareMap);
+        carousel = new Carousel(hardwareMap);
 
-        //register(deposit, intake, carousel);
-        register(deposit, intake);
+        register(deposit, intake, carousel);
+        // register(deposit, intake);
 
         driveGamepad = new GamepadEx(gamepad1);
         opGamepad = new GamepadEx(gamepad2);

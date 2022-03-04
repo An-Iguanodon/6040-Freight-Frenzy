@@ -120,6 +120,10 @@ public class Deposit extends SubsystemBase {
         depositServo.setPosition(pos);
     }
 
+    public void adjustTargetPos(int difference) {
+        targetPos += difference;
+    }
+
     public double getTargetPos() {
         return targetPos;
     }

@@ -8,7 +8,7 @@ public class Carousel extends SubsystemBase {
     private HardwareMap hwMap;
     private CRServo carouselServo;
 
-    private double power;
+    private double power = 0;
 
     public Carousel(HardwareMap hwMap) {
         this.hwMap = hwMap;
@@ -24,18 +24,6 @@ public class Carousel extends SubsystemBase {
     @Override
     public void periodic() {
         carouselServo.setPower(power);
-    }
-
-    public void blueSpin() {
-        power = 1.0;
-    }
-
-    public void redSpin() {
-        power = -1.0;
-    }
-
-    public void stop() {
-        power = 0.0;
     }
 
     public void setPower(double power) {

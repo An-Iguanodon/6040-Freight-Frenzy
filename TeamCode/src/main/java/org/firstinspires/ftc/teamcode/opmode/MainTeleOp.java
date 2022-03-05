@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.subsystem.Deposit;
 @Config
 public class MainTeleOp extends OpModeTemplate{
 
-    private double TEST_POS = 0;
+    private boolean slowMode = false;
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
@@ -31,8 +31,6 @@ public class MainTeleOp extends OpModeTemplate{
         new GamepadButton(opGamepad, GamepadKeys.Button.RIGHT_BUMPER).whenPressed(deposit::deploy);
         new GamepadButton(opGamepad, GamepadKeys.Button.A).whenPressed(deposit::retract);
 
-        new GamepadButton(opGamepad, GamepadKeys.Button.DPAD_UP).whenPressed(() -> deposit.adjustTargetPos(50));
-        new GamepadButton(opGamepad, GamepadKeys.Button.DPAD_UP).whenPressed(() -> deposit.adjustTargetPos(-50));
 
         new Trigger(() -> gamepad2.left_trigger > 0.25).whenActive(
                 () -> carousel.setPower(-1.0));
@@ -45,11 +43,19 @@ public class MainTeleOp extends OpModeTemplate{
     public void run() {
         super.run();
 
-        mecanumDrive.setDrivePower(
-                new Pose2d(-gamepad1.left_stick_y,
-                        -gamepad1.left_stick_x,
-                        -gamepad1.right_stick_x)
-        );
+        if(gamepad1.right_trigger > 0.3) {
+            mecanumDrive.setDrivePower(
+                    new Pose2d(-gamepad1.left_stick_y/2,
+                            -gamepad1.left_stick_x/2,
+                            -gamepad1.right_stick_x/2)
+            );
+        } else {
+            mecanumDrive.setDrivePower(
+                    new Pose2d(-gamepad1.left_stick_y,
+                            -gamepad1.left_stick_x,
+                            -gamepad1.right_stick_x)
+            );
+        }
 
         double rawIntakePower = -gamepad2.left_stick_y;
         intake.setPower(Math.signum(rawIntakePower) * rawIntakePower * rawIntakePower);
@@ -58,7 +64,6 @@ public class MainTeleOp extends OpModeTemplate{
         dashboardTelemetry.addData("Target Position:", deposit.getTargetPos());
         dashboardTelemetry.addData("Lift Motor Power:", deposit.getLiftMotorPower());
         dashboardTelemetry.addData("Offset:", deposit.getOffset());
-        dashboardTelemetry.addData("Test Position:", TEST_POS);
         dashboardTelemetry.update();
 
     }

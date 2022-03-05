@@ -25,7 +25,6 @@ abstract public class OpModeTemplate extends CommandOpMode {
         carousel = new Carousel(hardwareMap);
 
         register(deposit, intake, carousel);
-        // register(deposit, intake);
 
         driveGamepad = new GamepadEx(gamepad1);
         opGamepad = new GamepadEx(gamepad2);

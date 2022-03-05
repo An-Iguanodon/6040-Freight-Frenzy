@@ -116,6 +116,18 @@ public class Deposit extends SubsystemBase {
         state = State.DEPOSIT;
     }
 
+    public void setRunToPos() {
+        liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+    public void setRunUsingEncoder() {
+        liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    public void setLiftMotorPower() {
+
+    }
+
     public void setDepositServo(double pos) {
         depositServo.setPosition(pos);
     }
